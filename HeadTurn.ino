@@ -3,6 +3,7 @@
 const int maxDegreeToLeftShoulder = 30;
 const int maxDegreeToRightShoulder = 150;
 const int centeredDegree = 80;
+const boolean headturndebug = false;
 
 Servo headRotationServo;
 int headRotationServoPosition = 0;
@@ -38,10 +39,10 @@ void controlledWrite(int degree, int duration, int whileInState) {
     if(delayMs > 200) delayMs = 200;
     int increment = spread/delayMs;
     if(increment < 2) increment = 2;
-    if(werewolfdebug) log("HeadTurn: degree: " + String(degree) + " loc: " + String(headRotationServoPosition) + " spread: " + String(spread) + " delayMs: " + String(delayMs) + " increment: " + String(increment));
+    if(headturndebug) log("HeadTurn: degree: " + String(degree) + " loc: " + String(headRotationServoPosition) + " spread: " + String(spread) + " delayMs: " + String(delayMs) + " increment: " + String(increment));
     if(degree > headRotationServoPosition)  {
       while(headRotationServoPosition < degree && state == whileInState) {
-        if(werewolfdebug) log("HeadTurn: loc: " + String(headRotationServoPosition) + " moving " + String(increment) + " degress, delaying " + String(delayMs) + "ms");
+        if(headturndebug) log("HeadTurn: loc: " + String(headRotationServoPosition) + " moving " + String(increment) + " degress, delaying " + String(delayMs) + "ms");
         headRotationServoPosition = headRotationServoPosition + increment;
         headRotationServo.write(headRotationServoPosition);
         delay(delayMs);
@@ -49,7 +50,7 @@ void controlledWrite(int degree, int duration, int whileInState) {
       } 
     } else {
       while(headRotationServoPosition > degree && state == whileInState) {
-        if(werewolfdebug) log("HeadTurn: loc: " + String(headRotationServoPosition) + " moving " + String(-1*increment) + " degress, delaying " + String(delayMs) + "ms");
+        if(headturndebug) log("HeadTurn: loc: " + String(headRotationServoPosition) + " moving " + String(-1*increment) + " degress, delaying " + String(delayMs) + "ms");
         headRotationServoPosition = headRotationServoPosition - increment;
         headRotationServo.write(headRotationServoPosition);
         delay(delayMs);
@@ -79,6 +80,3 @@ void testTurn() {
     digitalWrite(GREEN_LED, LOW);
   delay(200);  
 }
-
-
-

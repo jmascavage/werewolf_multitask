@@ -5,8 +5,9 @@
  * 179 degrees = head looking for when standing, down when crouching
  */
 
-const int headDown = 70; //degrees
-const int headUp = 155; //degrees
+const int headDown = 10; //degrees
+const int headUp = 90; //degrees
+const boolean headliftdebug = false;
 
 Servo headLiftServo;
 int headLiftServoPosition = 0;
@@ -14,6 +15,7 @@ int headLiftServoPosition = 0;
 // the setup routine runs once when you press reset:
 void setupHeadLift() {                
   headLiftServo.attach(headLiftServoControlPin);
+  headLiftServo.write(90);
 }
 
 // the loop routine runs over and over again forever:
@@ -22,6 +24,8 @@ void loopHeadLift() {
 //  nod();
   //flag to shut-off head lifting effect
   if(headliftActive) {
+    if(headliftdebug) log("HeadLift: loc: " + String(headLiftServoPosition) + " mode: " +  state);
+//    if(state == panningMode )   speedControlledHeadLiftWrite(headUp, 6000, panningMode);
     if(state == panningMode && headLiftServoPosition < headUp)   speedControlledHeadLiftWrite(headUp, 6000, panningMode);
     if(state == risingMode && headLiftServoPosition > headDown)  speedControlledHeadLiftWrite(headDown, headLiftMillisForRisingMode, risingMode);
     if(state == howlingMode && headLiftServoPosition < headUp)   speedControlledHeadLiftWrite(headUp, headLiftMillisForHowlingMode, howlingMode);
@@ -39,18 +43,18 @@ void speedControlledHeadLiftWrite(int degree, int duration, int whileInState) {
   if(delayMs > 200) delayMs = 200;
   int increment = spread/delayMs;
   if(increment < 1) increment = 1;
-  if ( werewolfdebug ) log("Headlift: degree: " + String(degree) + " loc: " + String(headLiftServoPosition) + " spread: " + String(spread) + " delayMs: " + String(delayMs) + " increment: " + String(increment));
+  if ( headliftdebug ) log("Headlift: degree: " + String(degree) + " loc: " + String(headLiftServoPosition) + " spread: " + String(spread) + " delayMs: " + String(delayMs) + " increment: " + String(increment));
 
   if(degree < headLiftServoPosition)  {
     while(headLiftServoPosition > degree && state == whileInState) {
-      if ( werewolfdebug ) log("Headlift down loop: degree: " + String(degree) + " loc: " + String(headLiftServoPosition) + " spread: " + String(spread) + " delayMs: " + String(delayMs) + " increment: " + String(increment));
+      if ( headliftdebug ) log("Headlift down loop: degree: " + String(degree) + " loc: " + String(headLiftServoPosition) + " spread: " + String(spread) + " delayMs: " + String(delayMs) + " increment: " + String(increment));
       headLiftServoPosition = headLiftServoPosition - increment;
       headLiftServo.write( headLiftServoPosition );
       delay(delayMs);
     }  
   } else {
     while(headLiftServoPosition < degree && state == whileInState) {
-      if ( werewolfdebug ) log("Headlift up loop: degree: " + String(degree) + " loc: " + String(headLiftServoPosition) + " spread: " + String(spread) + " delayMs: " + String(delayMs) + " increment: " + String(increment));
+      if ( headliftdebug ) log("Headlift up loop: degree: " + String(degree) + " loc: " + String(headLiftServoPosition) + " spread: " + String(spread) + " delayMs: " + String(delayMs) + " increment: " + String(increment));
       headLiftServoPosition = headLiftServoPosition + increment;
       headLiftServo.write( headLiftServoPosition );
       delay(delayMs);
@@ -81,6 +85,3 @@ void nod() {
     digitalWrite(DEBUG_LED, LOW);
   delay(200);  
 }
-
-
-

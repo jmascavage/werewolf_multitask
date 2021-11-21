@@ -25,11 +25,12 @@ const int risingMode = 1;
 const int howlingMode = 2;
 #define HOWLING_LED BLUE_LED
 const int loweringMode = 3;
-#define DEBUG_LED YELLOW_LED
+//#define DEBUG_LED YELLOW_LED
+#define DEBUG_LED BLUE_LED
 
 const boolean headturnActive = true;
 const boolean headliftActive = true;
-const boolean mouthActive    = true;
+const boolean mouthActive    = false;
 const boolean breathingActive    = true;
 
 int state = 99; //needs to be set to some integer value - NOT one of the constants above - constants can be assigned to it after this point
@@ -50,7 +51,7 @@ const int resetMillis                    = 5000;  //time before allowed to re-tr
 
 // werewolfdebug turns on/off console logging - been having issues with the program locking up 
 // when logging to serial port so setting to false avoids this issue
-const boolean werewolfdebug = false;
+const boolean werewolfdebug = true;
 //int ConsoleBps = 9600;
 int ConsoleBps = 19200;
 //int ConsoleBps = 115200;
@@ -225,6 +226,3 @@ void log(String logLine)
     Serial.println(String(millis()) + ": " + logLine);
   }
 }
-
-
-
