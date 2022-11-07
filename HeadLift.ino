@@ -5,8 +5,8 @@
  * 179 degrees = head looking for when standing, down when crouching
  */
 
-const int headDown = 10; //degrees
-const int headUp = 90; //degrees
+const int headDown = 45; //degrees
+const int headUp = 95; //degrees
 const boolean headliftdebug = false;
 
 Servo headLiftServo;
