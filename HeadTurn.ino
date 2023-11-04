@@ -1,8 +1,8 @@
 #include <Servo.h>
 
-const int maxDegreeToLeftShoulder = 50;
-const int maxDegreeToRightShoulder = 170;
-const int centeredDegree = 110;
+const int maxDegreeToLeftShoulder = 10;
+const int maxDegreeToRightShoulder = 130;
+const int centeredDegree = 70;
 const boolean headturndebug = false;
 
 Servo headRotationServo;

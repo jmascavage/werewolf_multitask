@@ -6,7 +6,7 @@
  */
 
 const int headDown = 45; //degrees
-const int headUp = 95; //degrees
+const int headUp = 115; //degrees
 const boolean headliftdebug = false;
 
 Servo headLiftServo;
