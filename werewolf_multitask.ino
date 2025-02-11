@@ -15,8 +15,8 @@ const int mouthOpenServoControlPin    = 8;
 const int headRotationServoControlPin = 9;
 const int headLiftServoControlPin     = 11;
 
-const int minTriggerDistance = 10;      // minimum distance, inches,  object must be away in order to trigger
-const int maxTriggerDistance = 72;      // maximum distance, inches, object must be away in order to trigger
+const int minTriggerDistance = 10;//10;      // minimum distance, inches,  object must be away in order to trigger
+const int maxTriggerDistance = 30;//72;      // maximum distance, inches, object must be away in order to trigger
 
 const int panningMode = 0;
 #define PANNING_LED RED_LED
@@ -31,13 +31,13 @@ const int loweringMode = 3;
 const boolean headturnActive = true;
 const boolean headliftActive = true;
 const boolean mouthActive    = false;
-const boolean breathingActive    = true;
+const boolean breathingActive    = false;
 
 int state = 99; //needs to be set to some integer value - NOT one of the constants above - constants can be assigned to it after this point
 
 long counter;  //pure loop counter
 
-const int headTurnMillisForPanningMode   = 10000; //time to go from left-to-right or right-to-left
+const int headTurnMillisForPanningMode   = 5000; //time to go from left-to-right or right-to-left
 const int headLiftMillisForRisingMode    = 3000;  //time to get head looking down while rising
 const int headTurnMillisForRisingingMode = 3000;  //time to get head pointed forward
 const int lengthOfRisingMode             = 6000;  //time spent in rising mode - start to finish
@@ -139,28 +139,30 @@ void howl() {
 
 boolean isSomeoneClose() {
   int countOfHits = 0;
-  long inches = getSensorDistance();
+  long inches = getSensorDistanceOptimized();
   log("Run 1: " + String(inches) + "in");
   if (inches > minTriggerDistance && inches < maxTriggerDistance) {
     countOfHits = countOfHits + 1;
   }
+  if (countOfHits >= requiredHitCount ) return true;
+  
   delay(1);
-  inches = getSensorDistance();
+  inches = getSensorDistanceOptimized();
   log("Run 2: " + String(inches) + "in");
   if (inches > minTriggerDistance && inches < maxTriggerDistance) {
     countOfHits = countOfHits + 1;
   }
+  if (countOfHits >= requiredHitCount ) return true;
+
   delay(1);
-  inches = getSensorDistance();
+  inches = getSensorDistanceOptimized();
   log("Run 3: " + String(inches) + "in");
   if (inches > minTriggerDistance && inches < maxTriggerDistance) {
     countOfHits = countOfHits + 1;
   }
 
-  // print out distance to console
+  // print out count to console
   log("Count of hits: " + String(countOfHits));
-
-  //   delay(2000);
 
   if (countOfHits >= requiredHitCount ) {
     return true;
@@ -170,23 +172,125 @@ boolean isSomeoneClose() {
 
 }
 
+/*
 long getSensorDistance()
 {
   // The sensor is triggered by a HIGH pulse of 10 or more microseconds.
+  
+  if(werewolfdebug) log("getSensorDistance() setting low");
   // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+  log("set trig pin low");
   digitalWrite(sensorTrigPin, LOW);
+  log("read pulse to set state low");
+  read_pulseNB(sensorEchoPin); //lets read_pulse set its base
+  log("delay2");
   delayMicroseconds(2);
+  log("sest trig pin high on sensor");
   digitalWrite(sensorTrigPin, HIGH);
+  log("read pulse");
+  read_pulseNB(sensorEchoPin); //lets read_pulse detect the HIGH and mark time
   delayMicroseconds(10);
+  log("getSensorDistance() setting final low");
   digitalWrite(sensorTrigPin, LOW);
 
   // Read the signal from the sensor: a HIGH pulse whose
   // duration is the time (in microseconds) from the sending
   // of the ping to the reception of its echo off of an object.
+  log("getting duration");
   long duration = pulseIn(sensorEchoPin, HIGH);
+//  long duration = read_pulseNB(sensorEchoPin);
 
   // convert the time into a distance
+  if(werewolfdebug) log("returning inches...");
   return microsecondsToInches(duration);
+}
+*/
+
+/*
+ * Non-blocking pulseIn(): returns the pulse length in microseconds
+ * when the falling edge is detected. Otherwise returns 0.
+ */
+ /*
+unsigned long read_pulseNB(int pin)
+{
+    static unsigned long rising_time;  // time of the rising edge
+    static int last_state;             // previous pin state
+    int state = digitalRead(pin);      // current pin state
+    unsigned long pulse_length = 0;    // default return value
+
+    log("last_state == " + String(last_state) + " state == " + String(state));
+    // On rising edge: record current time.
+    if (last_state == LOW && state == HIGH) {
+        rising_time = micros();
+        log("read_pulseNB: last_state == LOW && state == HIGH rising_time=" + String(rising_time));
+    }
+
+    // On falling edge: report pulse length.
+    if (last_state == HIGH && state == LOW) {
+        unsigned long falling_time = micros();
+        pulse_length = falling_time - rising_time;
+        log("read_pulseNB: last_state == HIGH && state == LOW rising_time=" + String(rising_time) + " falling_time=" + String(falling_time));
+    }
+
+    last_state = state;
+    return pulse_length;
+}
+*/
+
+long getSensorDistanceOptimized()
+{
+  unsigned long rising_time;
+  unsigned long falling_time;
+  unsigned long pulse_length;
+  unsigned long timeout = 100000;
+    
+  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+  digitalWrite(sensorTrigPin, LOW);
+  delayMicroseconds(2);
+
+  // The sensor is triggered by a HIGH pulse of 10 or more microseconds.
+  digitalWrite(sensorTrigPin, HIGH);
+  delayMicroseconds(10);
+
+  // return Trigger pin to LOW
+  digitalWrite(sensorTrigPin, LOW);
+
+  // wait for any prior HIGH signal to clear - this really shouldn't happen, and shouldn't need a timeout protector
+  rising_time = micros();
+  while (digitalRead(sensorEchoPin) == HIGH) {
+    // do nothing - want this to be fast
+    if(micros() - rising_time > timeout ) return 0; //this is to exit if a signal is never found
+  }
+
+  // wait for the Echo signal to rise - just using rising_time to help with the timeout protector rather than a new variable
+  rising_time = micros();
+  while (digitalRead(sensorEchoPin) == LOW) {
+    // do nothing - want this to be fast
+    if(micros() - rising_time > timeout ) return 0; //this is to exit if a signal is never found
+  }
+
+  //since the Echo signal went high, capture the start time of signal
+  rising_time = micros();
+
+  // wait for signal to end - again, should not last forever so not protecting
+  falling_time = micros();
+  while (digitalRead(sensorEchoPin) == HIGH) {
+    // do nothing - want this to be fast
+        if(micros() - falling_time > timeout ) return 0; //this is to exit if a signal is never found
+
+  }
+
+  //since the Echo signal went low, capture the end time of signal
+  falling_time = micros();
+
+  // calculate pulse length in microsecs
+  pulse_length = falling_time - rising_time;
+  
+  log("pulse_length=" + String(pulse_length));
+  
+  // convert the time into a distance
+  log("returning inches..." + String(microsecondsToInches(pulse_length)));
+  return microsecondsToInches(pulse_length);
 }
 
 long microsecondsToInches(long microseconds)

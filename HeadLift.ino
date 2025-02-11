@@ -5,8 +5,8 @@
  * 179 degrees = head looking for when standing, down when crouching
  */
 
-const int headDown = 45; //degrees
-const int headUp = 115; //degrees
+const int headDown = 100; //degrees
+const int headUp = 150; //degrees
 const boolean headliftdebug = false;
 
 Servo headLiftServo;
@@ -21,7 +21,8 @@ void setupHeadLift() {
 // the loop routine runs over and over again forever:
 void loopHeadLift() {
 
-//  nod();
+  //nod();
+  
   //flag to shut-off head lifting effect
   if(headliftActive) {
     if(headliftdebug) log("HeadLift: loc: " + String(headLiftServoPosition) + " mode: " +  state);
@@ -31,6 +32,7 @@ void loopHeadLift() {
     if(state == howlingMode && headLiftServoPosition < headUp)   speedControlledHeadLiftWrite(headUp, headLiftMillisForHowlingMode, howlingMode);
     if(state == loweringMode && headLiftServoPosition < headUp)  speedControlledHeadLiftWrite(headUp, headLiftMillisForLoweringMode, loweringMode);
   }
+  
 }
 
 void speedControlledHeadLiftWrite(int degree, int duration, int whileInState) {
@@ -64,6 +66,7 @@ void speedControlledHeadLiftWrite(int degree, int duration, int whileInState) {
 
 
 void nod() {
+  log("nod");
     digitalWrite(DEBUG_LED, HIGH);
   headLiftServoPosition = headLiftServo.read();
   if(headLiftServoPosition ==92) digitalWrite(HOWLING_LED, HIGH);

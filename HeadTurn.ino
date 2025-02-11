@@ -1,8 +1,8 @@
 #include <Servo.h>
 
-const int maxDegreeToLeftShoulder = 10;
-const int maxDegreeToRightShoulder = 130;
-const int centeredDegree = 70;
+const int maxDegreeToLeftShoulder = 40;
+const int maxDegreeToRightShoulder = 90;
+const int centeredDegree = 65;
 const boolean headturndebug = false;
 
 Servo headRotationServo;
@@ -38,7 +38,7 @@ void controlledWrite(int degree, int duration, int whileInState) {
     int delayMs = duration/spread;
     if(delayMs > 200) delayMs = 200;
     int increment = spread/delayMs;
-    if(increment < 2) increment = 2;
+    if(increment < 1) increment = 1;
     if(headturndebug) log("HeadTurn: degree: " + String(degree) + " loc: " + String(headRotationServoPosition) + " spread: " + String(spread) + " delayMs: " + String(delayMs) + " increment: " + String(increment));
     if(degree > headRotationServoPosition)  {
       while(headRotationServoPosition < degree && state == whileInState) {
