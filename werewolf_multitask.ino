@@ -237,6 +237,19 @@ unsigned long read_pulseNB(int pin)
 }
 */
 
+/* 
+ * The normal pulseIn() method is a blocking call that disrupts all other threads.
+ * Since this werewolf uses parallel threads for moving servos, if we used the normal pulseIn() to check the distnace
+ * sensors the head has erratice movements - odd pauses when the distance sensor is checked.
+ * To avoid those odd pauses, this getSensorDistanceOptimized() avoids using pulseIn() and any other blocking calls by
+ * setting its own timestamps when triggreing the sensor and checking for its response.
+ * THE TRADEOFF is that there can be delays in the thread running this method (other threads being served before control is returned)
+ * and that can create artificial elongation of the sensor reading.
+ * In testing, those issues did appear but tended to be infrequent and offset by the use of multiple sensor readings to confirm
+ * the presence of a person rather than reacting to a single reading.  
+ * Halloween 2025 will be the first to test this over the course of hours.  In house testing already indicates that the werewolf behavior
+ * should be as expected.
+ */
 long getSensorDistanceOptimized()
 {
   unsigned long rising_time;
