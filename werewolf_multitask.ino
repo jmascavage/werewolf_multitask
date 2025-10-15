@@ -30,8 +30,8 @@ const int loweringMode = 3;
 
 const boolean headturnActive = true;
 const boolean headliftActive = true;
-const boolean mouthActive    = false;
-const boolean breathingActive    = false;
+const boolean mouthActive    = true;
+const boolean breathingActive    = true;
 
 int state = 99; //needs to be set to some integer value - NOT one of the constants above - constants can be assigned to it after this point
 

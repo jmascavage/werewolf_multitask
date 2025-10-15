@@ -21,7 +21,7 @@ void setupHeadLift() {
 // the loop routine runs over and over again forever:
 void loopHeadLift() {
 
-  //nod();
+//  nod();
   
   //flag to shut-off head lifting effect
   if(headliftActive) {
