@@ -16,7 +16,7 @@ const int headRotationServoControlPin = 9;
 const int headLiftServoControlPin     = 11;
 
 const int minTriggerDistance = 10;//10;      // minimum distance, inches,  object must be away in order to trigger
-const int maxTriggerDistance = 30;//72;      // maximum distance, inches, object must be away in order to trigger
+const int maxTriggerDistance = 48;//72;      // maximum distance, inches, object must be away in order to trigger
 
 const int panningMode = 0;
 #define PANNING_LED RED_LED
