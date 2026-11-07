@@ -41,7 +41,7 @@ const int headTurnMillisForPanningMode   = 5000; //time to go from left-to-right
 const int headLiftMillisForRisingMode    = 3000;  //time to get head looking down while rising
 const int headTurnMillisForRisingingMode = 3000;  //time to get head pointed forward
 const int lengthOfRisingMode             = 6000;  //time spent in rising mode - start to finish
-const int headLiftMillisForHowlingMode   = 3000;  //time to raise head to howl
+const int headLiftMillisForHowlingMode   = 1000;  //time to raise head to howl
 const int lengthOfHowlMillis             = 6000;  //length of howl sound
 const int lengthOfHowlingMode            = 6000;  //time spent in howling mode - start to finish
 const int headLiftMillisForLoweringMode  = 5000;  //time to lower head while lowering
@@ -257,9 +257,9 @@ long getSensorDistanceOptimized()
   unsigned long pulse_length;
   unsigned long timeout = 100000;
     
-  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+  // Give a LOW pulse beforehand to ensure a clean HIGH pulse:
   digitalWrite(sensorTrigPin, LOW);
-  delayMicroseconds(2);
+  delayMicroseconds(2000);
 
   // The sensor is triggered by a HIGH pulse of 10 or more microseconds.
   digitalWrite(sensorTrigPin, HIGH);
@@ -272,14 +272,20 @@ long getSensorDistanceOptimized()
   rising_time = micros();
   while (digitalRead(sensorEchoPin) == HIGH) {
     // do nothing - want this to be fast
-    if(micros() - rising_time > timeout ) return 0; //this is to exit if a signal is never found
+    if(micros() - rising_time > timeout ) {
+      log("Timed out waiting for prior HIGH signal to clear/go LOW");
+      return 0; //this is to exit if a signal is never found
+    }
   }
 
   // wait for the Echo signal to rise - just using rising_time to help with the timeout protector rather than a new variable
   rising_time = micros();
   while (digitalRead(sensorEchoPin) == LOW) {
     // do nothing - want this to be fast
-    if(micros() - rising_time > timeout ) return 0; //this is to exit if a signal is never found
+    if(micros() - rising_time > timeout ) {
+      log("Timed out waiting for LOW signal to switch to HIGH");
+      return 0; //this is to exit if a signal is never found
+    }
   }
 
   //since the Echo signal went high, capture the start time of signal
@@ -289,7 +295,10 @@ long getSensorDistanceOptimized()
   falling_time = micros();
   while (digitalRead(sensorEchoPin) == HIGH) {
     // do nothing - want this to be fast
-        if(micros() - falling_time > timeout ) return 0; //this is to exit if a signal is never found
+        if(micros() - falling_time > timeout ) {
+          log("Timed out waiting for HIGH signal to end");
+          return 0; //this is to exit if a signal is never found
+        }
 
   }
 
@@ -299,10 +308,10 @@ long getSensorDistanceOptimized()
   // calculate pulse length in microsecs
   pulse_length = falling_time - rising_time;
   
-  log("pulse_length=" + String(pulse_length));
+  //log("pulse_length=" + String(pulse_length));
   
   // convert the time into a distance
-  log("returning inches..." + String(microsecondsToInches(pulse_length)));
+  //log("returning inches..." + String(microsecondsToInches(pulse_length)));
   return microsecondsToInches(pulse_length);
 }
 
